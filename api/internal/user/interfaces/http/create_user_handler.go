@@ -23,7 +23,7 @@ type UserResponse struct {
 // @Success      200     {object} UserResponse
 // @Failure      default {object} response.ApiError
 // @Router       /user/create [post]
-func (us *UserHandler) CreateUser(ctx gin.Context, req *LoginRequest) gin.HandlerFunc {
+func (us *UserHandler) CreateUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		requestUser := httpctx.GetUserFromContext(c)
 

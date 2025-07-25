@@ -3,7 +3,7 @@ package middleware
 import (
 	"context"
 	"errors"
-	keys "github.com/ebubekir/go-talk/api/internal/keys"
+	"github.com/ebubekir/go-talk/api/internal/commons"
 	"github.com/ebubekir/go-talk/api/internal/response"
 	"github.com/ebubekir/go-talk/api/internal/user/application"
 	"github.com/ebubekir/go-talk/api/pkg/firebase"
@@ -55,7 +55,6 @@ func (a *AuthMiddleware) Handler() gin.HandlerFunc {
 			// Google login add user to database
 			if v, hasValue := firebaseToken.Claims["name"]; hasValue {
 				name = v.(string)
-				c.Set(keys.Name, name)
 			}
 
 			err = a.userService.CreateUser(
@@ -71,7 +70,7 @@ func (a *AuthMiddleware) Handler() gin.HandlerFunc {
 			return
 		}
 
-		c.Set(keys.User, user)
+		c.Set(commons.UserContextKey, user)
 		c.Next()
 	}
 }
