@@ -14,11 +14,15 @@ func NewUserService(repo domain.UserRepository) *UserService {
 	return &UserService{repo: repo, userService: userService}
 }
 
-func (us *UserService) CreateUser(firebaseId, name, email string) error {
+func (us *UserService) CreateUser(firebaseId, name, email string) (*domain.User, error) {
 	if user, err := us.userService.Create(firebaseId, name, email); err != nil {
-		return err
+		return nil, err
 	} else {
-		return us.repo.Create(user)
+		if err = us.repo.Create(user); err != nil {
+			return nil, err
+		} else {
+			return user, nil
+		}
 	}
 }
 

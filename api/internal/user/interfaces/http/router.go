@@ -11,5 +11,6 @@ func RegisterUserRoutes(router *gin.RouterGroup, userService *application.UserSe
 	userGroup := router.Group("/user")
 	{
 		userGroup.POST("/create", handler.CreateUser())
+		userGroup.GET("/me", handler.GetCurrentUser())
 	}
 }

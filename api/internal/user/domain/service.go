@@ -10,5 +10,6 @@ func (us *UserService) Create(firebaseId, name, email string) (*User, error) {
 		FirebaseId: firebaseId,
 		Name:       name,
 		Email:      email,
+		IsDeleted:  false,
 	}, nil
 }

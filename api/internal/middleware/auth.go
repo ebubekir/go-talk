@@ -45,6 +45,10 @@ func (a *AuthMiddleware) Handler() gin.HandlerFunc {
 		name := ""
 		email := ""
 
+		if v, hasValue := firebaseToken.Claims["email"]; hasValue {
+			email = v.(string)
+		}
+
 		user, err := a.userService.GetUserByEmail(email)
 		if err != nil {
 			response.SystemError(c, err)
@@ -57,17 +61,17 @@ func (a *AuthMiddleware) Handler() gin.HandlerFunc {
 				name = v.(string)
 			}
 
-			err = a.userService.CreateUser(
+			user, err = a.userService.CreateUser(
 				firebaseToken.UID,
 				name,
 				email,
 			)
 
-		}
-
-		if user.IsDeleted {
-			response.UnauthorizedError(c, errors.New("user is deleted"))
-			return
+		} else {
+			if user.IsDeleted {
+				response.UnauthorizedError(c, errors.New("user is deleted"))
+				return
+			}
 		}
 
 		c.Set(commons.UserContextKey, user)

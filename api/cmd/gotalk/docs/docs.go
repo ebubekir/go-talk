@@ -24,9 +24,37 @@ const docTemplate = `{
                 ],
                 "description": "Create user.",
                 "tags": [
-                    "Auth"
+                    "User"
                 ],
                 "summary": "CreateUser",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/me": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get  current authenticated user.",
+                "tags": [
+                    "User"
+                ],
+                "summary": "GetCurrentUser",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -64,16 +92,17 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "email",
+                "id",
                 "name"
             ],
             "properties": {
                 "email": {
                     "type": "string"
                 },
-                "name": {
+                "id": {
                     "type": "string"
                 },
-                "phone": {
+                "name": {
                     "type": "string"
                 }
             }

@@ -13,12 +13,13 @@ definitions:
     properties:
       email:
         type: string
-      name:
+      id:
         type: string
-      phone:
+      name:
         type: string
     required:
     - email
+    - id
     - name
     type: object
 info:
@@ -40,7 +41,24 @@ paths:
       - ApiKeyAuth: []
       summary: CreateUser
       tags:
-      - Auth
+      - User
+  /user/me:
+    get:
+      description: Get  current authenticated user.
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+      - ApiKeyAuth: []
+      summary: GetCurrentUser
+      tags:
+      - User
 securityDefinitions:
   ApiKeyAuth:
     in: header

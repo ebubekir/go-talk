@@ -6,24 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type LoginRequest struct {
-} // @name LoginRequest
+type GetCurrentUserRequest struct{}
 
-type UserResponse struct {
-	Id    string `json:"id" binding:"required"`
-	Name  string `json:"name"  binding:"required"`
-	Email string `json:"email" binding:"required"`
-} // @name User
-
-// CreateUser
-// @Summary      CreateUser
-// @Description  Create user.
+// GetCurrentUser
+// @Summary      GetCurrentUser
+// @Description  Get  current authenticated user.
 // @Security 	 ApiKeyAuth
 // @Tags         User
 // @Success      200     {object} UserResponse
 // @Failure      default {object} response.ApiError
-// @Router       /user/create [post]
-func (us *UserHandler) CreateUser() gin.HandlerFunc {
+// @Router       /user/me [get]
+func (us *UserHandler) GetCurrentUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		requestUser := httpctx.GetUserFromContext(c)
 

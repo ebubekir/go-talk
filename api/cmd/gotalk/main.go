@@ -11,9 +11,11 @@ import (
 	userHttp "github.com/ebubekir/go-talk/api/internal/user/interfaces/http"
 	"github.com/ebubekir/go-talk/api/pkg/firebase"
 	"github.com/ebubekir/go-talk/api/pkg/mongodb"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"time"
 )
 
 // @securityDefinitions.apikey ApiKeyAuth
@@ -60,6 +62,7 @@ func main() {
 	// Create api
 	api := gin.Default()
 	api.Use(CustomRecovery())
+	api.Use(Cors())
 	api.Use(gin.Logger())
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -86,5 +89,19 @@ func CustomRecovery() gin.HandlerFunc {
 			msg = fmt.Sprintf("Unhandled Error: %v", err.(error).Error())
 		}
 		response.SystemError(c, errors.New(msg))
+	})
+}
+
+func Cors() gin.HandlerFunc {
+	return cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"POST,HEAD,PATCH,OPTIONS,GET,PUT,DELETE"},
+		AllowHeaders:     []string{"*"},
+		ExposeHeaders:    []string{"*"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return origin == "*"
+		},
+		MaxAge: 12 * time.Hour,
 	})
 }
