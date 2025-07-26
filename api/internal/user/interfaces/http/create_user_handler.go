@@ -6,9 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type LoginRequest struct {
-} // @name LoginRequest
-
 type UserResponse struct {
 	Id    string `json:"id" binding:"required"`
 	Name  string `json:"name"  binding:"required"`

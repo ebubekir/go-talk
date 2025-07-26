@@ -9,6 +9,19 @@ definitions:
     - code
     - message
     type: object
+  Room:
+    properties:
+      id:
+        type: string
+      isPrivate:
+        type: boolean
+      ownerId:
+        type: string
+    required:
+    - id
+    - isPrivate
+    - ownerId
+    type: object
   User:
     properties:
       email:
@@ -25,6 +38,23 @@ definitions:
 info:
   contact: {}
 paths:
+  /room/create:
+    post:
+      description: Create room
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Room'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+      - ApiKeyAuth: []
+      summary: CreateRoom
+      tags:
+      - Room
   /user/create:
     post:
       description: Create user.

@@ -6,6 +6,9 @@ import (
 	"github.com/ebubekir/go-talk/api/cmd/gotalk/docs"
 	"github.com/ebubekir/go-talk/api/internal/middleware"
 	"github.com/ebubekir/go-talk/api/internal/response"
+	"github.com/ebubekir/go-talk/api/internal/room/application"
+	roomInfra "github.com/ebubekir/go-talk/api/internal/room/infra"
+	roomHttp "github.com/ebubekir/go-talk/api/internal/room/interfaces/http"
 	userApp "github.com/ebubekir/go-talk/api/internal/user/application"
 	userInfra "github.com/ebubekir/go-talk/api/internal/user/infra"
 	userHttp "github.com/ebubekir/go-talk/api/internal/user/interfaces/http"
@@ -38,6 +41,10 @@ func main() {
 	// User
 	userRepo := userInfra.NewMongoDbUserRepository(mongoDb)
 	userService := userApp.NewUserService(userRepo)
+
+	// Room
+	roomRepo := roomInfra.NewMongoDbRoomRepository(mongoDb)
+	roomService := application.NewRoomService(roomRepo)
 
 	// Middlewares
 	authMiddleware := middleware.NewAuthMiddleware(firebaseApp, userService)
@@ -72,6 +79,7 @@ func main() {
 	{
 		v1Routes.Use(authMiddleware.Handler())
 		userHttp.RegisterUserRoutes(v1Routes, userService)
+		roomHttp.RegisterRoomRoutes(v1Routes, roomService)
 	}
 
 	if err := api.Run(":8080"); err != nil {
