@@ -24,6 +24,7 @@ interface AuthContextType {
     loading: boolean;
     signInWithGoogle: () => Promise<void>;
     logout: () => Promise<void>;
+    authToken?: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -31,6 +32,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<UserResponse | null>(null);
     const [loading, setLoading] = useState(true);
+    const [authToken, setAuthToken] = useState<string | null>(null);
     const pathname = usePathname();
     const router = useRouter();
 
@@ -47,13 +49,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     .getUser()
                     .then((user) => {
                         setUser(user);
-                        console.log('user', user);
                         setLoading(false);
                     })
                     .catch((err: Error) => {
                         auth.signOut();
                         router.push('/login');
                     });
+                firebaseUser?.getIdToken().then(res => setAuthToken(res))
                 setLoading(false);
             }
         });
@@ -89,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         signInWithGoogle,
         logout,
+        authToken
     };
 
     return (

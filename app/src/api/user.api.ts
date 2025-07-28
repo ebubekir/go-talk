@@ -1,4 +1,4 @@
-import { BaseApi } from '@/api/base.abi';
+import { BaseApi } from '@/api/base.api';
 import { UserResponse } from '@/api/types';
 
 export class UserApi extends BaseApi {
