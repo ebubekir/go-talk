@@ -22,6 +22,24 @@ definitions:
     - isPrivate
     - ownerId
     type: object
+  RoomDetail:
+    properties:
+      id:
+        type: string
+      isPrivate:
+        type: boolean
+      owner:
+        $ref: '#/definitions/User'
+      participants:
+        items:
+          $ref: '#/definitions/User'
+        type: array
+    required:
+    - id
+    - isPrivate
+    - owner
+    - participants
+    type: object
   User:
     properties:
       email:
@@ -38,6 +56,29 @@ definitions:
 info:
   contact: {}
 paths:
+  /room/{roomId}:
+    get:
+      description: Get detail of room
+      parameters:
+      - description: Room Id
+        in: path
+        name: roomId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/RoomDetail'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+      - ApiKeyAuth: []
+      summary: GetRoomDetail
+      tags:
+      - Room
   /room/create:
     post:
       description: Create room

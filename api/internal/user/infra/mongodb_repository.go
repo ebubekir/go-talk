@@ -21,3 +21,7 @@ func (m *MongoDbUserRepository) Create(user *domain.User) error {
 func (m *MongoDbUserRepository) GetUserByEmail(email string) (*domain.User, error) {
 	return mongodb.GetOneByField[domain.User](m.db, m.collectionName, "email", email)
 }
+
+func (m *MongoDbUserRepository) GetUserById(id string) (*domain.User, error) {
+	return mongodb.GetOneByField[domain.User](m.db, m.collectionName, "_id", id)
+}

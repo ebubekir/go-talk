@@ -43,6 +43,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/room/{roomId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get detail of room",
+                "tags": [
+                    "Room"
+                ],
+                "summary": "GetRoomDetail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room Id",
+                        "name": "roomId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/RoomDetail"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/user/create": {
             "post": {
                 "security": [
@@ -132,6 +169,32 @@ const docTemplate = `{
                 },
                 "ownerId": {
                     "type": "string"
+                }
+            }
+        },
+        "RoomDetail": {
+            "type": "object",
+            "required": [
+                "id",
+                "isPrivate",
+                "owner",
+                "participants"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "isPrivate": {
+                    "type": "boolean"
+                },
+                "owner": {
+                    "$ref": "#/definitions/User"
+                },
+                "participants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/User"
+                    }
                 }
             }
         },

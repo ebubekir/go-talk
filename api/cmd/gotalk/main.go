@@ -12,6 +12,7 @@ import (
 	userApp "github.com/ebubekir/go-talk/api/internal/user/application"
 	userInfra "github.com/ebubekir/go-talk/api/internal/user/infra"
 	userHttp "github.com/ebubekir/go-talk/api/internal/user/interfaces/http"
+	"github.com/ebubekir/go-talk/api/internal/websocket"
 	"github.com/ebubekir/go-talk/api/pkg/firebase"
 	"github.com/ebubekir/go-talk/api/pkg/mongodb"
 	"github.com/gin-contrib/cors"
@@ -38,13 +39,17 @@ func main() {
 		panic(err)
 	}
 
+	// Hub
+	roomHub := websocket.NewHub(firebaseApp)
+	go roomHub.Run()
+
 	// User
 	userRepo := userInfra.NewMongoDbUserRepository(mongoDb)
 	userService := userApp.NewUserService(userRepo)
 
 	// Room
 	roomRepo := roomInfra.NewMongoDbRoomRepository(mongoDb)
-	roomService := application.NewRoomService(roomRepo)
+	roomService := application.NewRoomService(roomRepo, roomHub, userService)
 
 	// Middlewares
 	authMiddleware := middleware.NewAuthMiddleware(firebaseApp, userService)
@@ -72,6 +77,7 @@ func main() {
 	api.Use(Cors())
 	api.Use(gin.Logger())
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	api.GET("/ws/room/:roomId", websocket.RoomWS(roomHub))
 
 	api.Use(authMiddleware.Handler())
 
@@ -79,7 +85,7 @@ func main() {
 	{
 		v1Routes.Use(authMiddleware.Handler())
 		userHttp.RegisterUserRoutes(v1Routes, userService)
-		roomHttp.RegisterRoomRoutes(v1Routes, roomService)
+		roomHttp.RegisterRoomRoutes(v1Routes, roomService, userService)
 	}
 
 	if err := api.Run(":8080"); err != nil {

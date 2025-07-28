@@ -29,3 +29,7 @@ func (us *UserService) CreateUser(firebaseId, name, email string) (*domain.User,
 func (us *UserService) GetUserByEmail(email string) (*domain.User, error) {
 	return us.repo.GetUserByEmail(email)
 }
+
+func (us *UserService) GetUserById(id string) (*domain.User, error) {
+	return us.repo.GetUserById(id)
+}
