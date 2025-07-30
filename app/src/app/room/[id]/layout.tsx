@@ -1,6 +1,6 @@
 'use client'
 
-import {RoomContextProvider} from "@/context/room-context";
+import {RoomContextProvider, useRoom} from "@/context/room-context";
 import {use} from "react";
 import {RoomSocketProvider} from "@/context/room-socket-context";
 
@@ -14,7 +14,7 @@ export default function RoomLayout({
     const { id } = use(params)
     return (
         <RoomContextProvider>
-            <RoomSocketProvider roomId={id}>
+            <RoomSocketProvider>
                 {children}
             </RoomSocketProvider>
         </RoomContextProvider>

@@ -3,6 +3,7 @@ import {useEffect} from "react";
 
 enum RoomEventName {
     ParticipantJoined = 'participant-joined',
+    ParticipantLeft = 'participant-left',
 }
 
 export interface EventPayload {
@@ -32,19 +33,23 @@ class ParticipantJoinedEvent extends RoomEvent {
     }
 
     handle(data: EventPayload) {
-        const payload = data.payload as { userName: string, userId: string, joinedAt: string };
+        const payload = data.payload as { userName: string, userEmail: string, joinedAt: string };
         showInfoToastMessage(`${payload?.userName} joined the room!`);
     }
 }
 
-const participantJoinedEvent = new ParticipantJoinedEvent();
+class ParticipantLeftEvent extends RoomEvent {
+    constructor() {
+        super(RoomEventName.ParticipantJoined);
+    }
 
-export const webSocketEventHandlers: Record<RoomEventName, RoomEvent> = {
-    [RoomEventName.ParticipantJoined]: participantJoinedEvent,
+    handle(data: EventPayload) {
+        const payload = data.payload as { userName: string, userEmail: string, leftAt: string };
+        showInfoToastMessage(`${payload?.userName} left the room!`);
+    }
 }
 
-export const useRoomEvents = (id: string, authToken: string) => {
-    useEffect(() => {
-
-    }, [id, authToken])
+export const webSocketEventHandlers: Record<RoomEventName, RoomEvent> = {
+    [RoomEventName.ParticipantJoined]: new ParticipantJoinedEvent(),
+    [RoomEventName.ParticipantLeft]: new ParticipantLeftEvent(),
 }

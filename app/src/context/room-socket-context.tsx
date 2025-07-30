@@ -1,10 +1,9 @@
-// context/socket-context.tsx
 'use client'
-import {createContext, useContext, useEffect, useRef, useState} from "react";
+import {createContext, useCallback, useContext, useEffect, useRef, useState} from "react";
 import {connectToSocket} from "@/api/socket.api";
 import {EventPayload, webSocketEventHandlers} from "@/lib/room-events";
 import {useAuth} from "@/context/auth-context";
-import {RoomContextProvider} from "@/context/room-context";
+import {RoomContextProvider, useRoom} from "@/context/room-context";
 
 interface RoomSocketContextType {
     socket: WebSocket | null;
@@ -20,22 +19,31 @@ export const useSocket = () => {
     return context;
 }
 
-export const RoomSocketProvider = ({ roomId, children }: { roomId: string, children: React.ReactNode }) => {
+export const RoomSocketProvider = ({ children }: { children: React.ReactNode }) => {
     const { authToken } = useAuth();
     const socketRef = useRef<WebSocket | null>(null);
     const [socket, setSocket] = useState<WebSocket | null>(null);
     const connectedRef = useRef(false)
+    const { getRoomDetails, room, roomId } = useRoom()
+
+
 
     useEffect(() => {
-        if (!roomId || !authToken || connectedRef.current) return;
+        console.log('roomSocket useEffect')
+        if (!room?.id || !authToken || connectedRef.current) return;
 
         const initSocket = async () => {
             try {
-                const ws = await connectToSocket(roomId, authToken);
+                const ws = await connectToSocket(room?.id, authToken);
                 ws.onmessage = (event) => {
                     try {
                         const data = JSON.parse(event.data) as EventPayload;
-                        webSocketEventHandlers[data.type]?.handle(data);
+                        if (webSocketEventHandlers[data.type]) {
+                            webSocketEventHandlers[data.type]?.handle(data);
+                            console.log(data)
+                            // actionRef.current(data)
+                            getRoomDetails()
+                        }
                     } catch (e) {
                         console.error("Socket message error", e);
                     }
@@ -53,7 +61,7 @@ export const RoomSocketProvider = ({ roomId, children }: { roomId: string, child
         return () => {
             socketRef.current?.close();
         };
-    }, [roomId, authToken]);
+    }, [room?.id, authToken]);
 
     return (
         <RoomSocketContext.Provider value={{ socket }}>
