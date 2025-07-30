@@ -3,19 +3,17 @@ package application
 import (
 	"github.com/ebubekir/go-talk/api/internal/room/domain"
 	userApp "github.com/ebubekir/go-talk/api/internal/user/application"
-	"github.com/ebubekir/go-talk/api/internal/websocket"
 )
 
 type RoomService struct {
 	repo        domain.RoomRepository
 	service     *domain.RoomService
 	userService userApp.UserService
-	roomHub     *websocket.Hub
 }
 
-func NewRoomService(repo domain.RoomRepository, hub *websocket.Hub, userService *userApp.UserService) *RoomService {
+func NewRoomService(repo domain.RoomRepository, userService *userApp.UserService) *RoomService {
 	roomService := &domain.RoomService{}
-	return &RoomService{repo: repo, service: roomService, roomHub: hub, userService: *userService}
+	return &RoomService{repo: repo, service: roomService, userService: *userService}
 }
 
 func (rs *RoomService) Create(createdByUserId string, isPrivateRoom bool) (*domain.Room, error) {
@@ -31,33 +29,50 @@ func (rs *RoomService) Create(createdByUserId string, isPrivateRoom bool) (*doma
 
 }
 
-func (rs *RoomService) JoinRoom(userId string, roomId string) error {
+func (rs *RoomService) JoinRoom(roomId string, userEmail string) error {
 	room, err := rs.repo.GetRoomById(roomId)
 	if err != nil {
 		return err
 	}
-	err = room.AddParticipant(domain.UserId(userId))
+
+	user, err := rs.userService.GetUserByEmail(userEmail)
 	if err != nil {
 		return err
 	}
 
+	err = room.AddParticipant(domain.UserId(user.Id))
+	if err != nil {
+		return err
+	}
 	_ = rs.repo.Save(room)
-
-	user, err := rs.userService.GetUserById(userId)
-	if err != nil {
-		return err
-	}
-
-	rs.roomHub.Broadcast(
-		roomId,
-		websocket.EventParticipantJoined,
-		&websocket.ParticipantJoinedPayload{
-			UserId:   user.Id,
-			UserName: user.Name})
-
 	return nil
 }
 
 func (rs *RoomService) GetRoomById(roomId string) (*domain.Room, error) {
 	return rs.repo.GetRoomById(roomId)
+}
+
+func (rs *RoomService) LeaveRoom(roomId string, userEmail string) error {
+	room, err := rs.repo.GetRoomById(roomId)
+	if err != nil {
+		return nil
+	}
+
+	user, err := rs.userService.GetUserByEmail(userEmail)
+	if err != nil {
+		return err
+	}
+
+	err = room.RemoveParticipant(domain.UserId(user.Id))
+	if err != nil {
+		return err
+	}
+
+	err = rs.repo.Save(room)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

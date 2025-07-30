@@ -39,11 +39,6 @@ func (r *RoomHandler) GetRoomDetail() gin.HandlerFunc {
 			return
 		}
 
-		if err = r.roomService.JoinRoom(currentUser.Id, roomId); err != nil {
-			response.SystemError(c, err)
-			return
-		}
-
 		res := &RoomDetailResponse{
 			Id:        string(room.Id),
 			IsPrivate: room.IsPrivate,

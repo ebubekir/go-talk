@@ -16,9 +16,15 @@ const (
 )
 
 type ParticipantJoinedPayload struct {
-	UserId   string    `json:"userId"`
-	UserName string    `json:"userName"`
-	JoinedAt time.Time `json:"joinedAt"`
+	UserEmail string    `json:"userEmail"`
+	UserName  string    `json:"userName"`
+	JoinedAt  time.Time `json:"joinedAt"`
+}
+
+type ParticipantLeftPayload struct {
+	UserEmail string    `json:"userEmail"`
+	UserName  string    `json:"userName"`
+	LeftAt    time.Time `json:"leftAt"`
 }
 
 type Event struct {
@@ -31,4 +37,34 @@ type Event struct {
 func (e *Event) ToJSON() []byte {
 	bytes, _ := json.Marshal(e)
 	return bytes
+}
+
+type EventListener interface {
+	HandleEvents() []EventType
+	HandleEvent(evt *Event)
+}
+
+type EventDispatcher struct {
+	listeners []EventListener
+}
+
+func NewEventDispatcher() *EventDispatcher {
+	return &EventDispatcher{
+		listeners: make([]EventListener, 0),
+	}
+}
+
+func (e *EventDispatcher) Register(listener EventListener) {
+	e.listeners = append(e.listeners, listener)
+}
+
+func (e *EventDispatcher) Dispatch(evt *Event) {
+	for _, listener := range e.listeners {
+		for _, eventType := range listener.HandleEvents() {
+			if eventType == evt.Type {
+				listener.HandleEvent(evt)
+				break
+			}
+		}
+	}
 }

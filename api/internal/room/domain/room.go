@@ -28,6 +28,24 @@ func (r *Room) AddParticipant(userId UserId) error {
 	return nil
 }
 
+func (r *Room) RemoveParticipant(userId UserId) error {
+	if !r.HasParticipant(userId) {
+		return nil
+	}
+
+	newParticipants := make([]Participant, 0)
+
+	for _, p := range r.Participants {
+		if p.UserId == userId {
+			continue
+		}
+		newParticipants = append(newParticipants, p)
+	}
+
+	r.Participants = newParticipants
+	return nil
+}
+
 func (r *Room) HasParticipant(userId UserId) bool {
 	if r.OwnerId == userId {
 		return true

@@ -6,7 +6,7 @@ import (
 	"github.com/ebubekir/go-talk/api/cmd/gotalk/docs"
 	"github.com/ebubekir/go-talk/api/internal/middleware"
 	"github.com/ebubekir/go-talk/api/internal/response"
-	"github.com/ebubekir/go-talk/api/internal/room/application"
+	roomApp "github.com/ebubekir/go-talk/api/internal/room/application"
 	roomInfra "github.com/ebubekir/go-talk/api/internal/room/infra"
 	roomHttp "github.com/ebubekir/go-talk/api/internal/room/interfaces/http"
 	userApp "github.com/ebubekir/go-talk/api/internal/user/application"
@@ -40,8 +40,8 @@ func main() {
 	}
 
 	// Hub
-	roomHub := websocket.NewHub(firebaseApp)
-	go roomHub.Run()
+	dispatcher := websocket.NewEventDispatcher()
+	roomHub := websocket.NewHub(firebaseApp, dispatcher)
 
 	// User
 	userRepo := userInfra.NewMongoDbUserRepository(mongoDb)
@@ -49,7 +49,14 @@ func main() {
 
 	// Room
 	roomRepo := roomInfra.NewMongoDbRoomRepository(mongoDb)
-	roomService := application.NewRoomService(roomRepo, roomHub, userService)
+	roomService := roomApp.NewRoomService(roomRepo, userService)
+	roomEventListener := roomApp.NewRoomEventListener(roomService, roomHub)
+
+	// Register event listeners
+	dispatcher.Register(roomEventListener)
+
+	// Run hub
+	go roomHub.Run()
 
 	// Middlewares
 	authMiddleware := middleware.NewAuthMiddleware(firebaseApp, userService)
@@ -77,7 +84,7 @@ func main() {
 	api.Use(Cors())
 	api.Use(gin.Logger())
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	api.GET("/ws/room/:roomId", websocket.RoomWS(roomHub))
+	api.GET("/ws/room/:roomId", websocket.RoomWS(roomHub, userService))
 
 	api.Use(authMiddleware.Handler())
 

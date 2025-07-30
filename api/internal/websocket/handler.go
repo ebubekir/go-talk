@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ebubekir/go-talk/api/internal/response"
+	userApp "github.com/ebubekir/go-talk/api/internal/user/application"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"
@@ -15,7 +16,7 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func RoomWS(hub *Hub) gin.HandlerFunc {
+func RoomWS(hub *Hub, userService *userApp.UserService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		fmt.Printf("Socket connected for room: %s \n", c.Param("roomId"))
 		roomId := c.Param("roomId")
@@ -37,10 +38,10 @@ func RoomWS(hub *Hub) gin.HandlerFunc {
 			userEmail = v.(string)
 		}
 
-		userName := ""
-
-		if v, hasValue := token.Claims["name"]; hasValue {
-			userName = v.(string)
+		user, err := userService.GetUserByEmail(userEmail)
+		if err != nil {
+			response.SystemError(c, err)
+			return
 		}
 
 		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
@@ -52,8 +53,8 @@ func RoomWS(hub *Hub) gin.HandlerFunc {
 			conn:      conn,
 			send:      make(chan []byte, 256),
 			roomId:    roomId,
-			userEmail: userEmail,
-			userName:  userName,
+			userEmail: user.Email,
+			userName:  user.Name,
 		}
 
 		hub.register <- client
