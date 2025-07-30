@@ -80,6 +80,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/room/{roomId}/chat": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get chat of room",
+                "tags": [
+                    "Room",
+                    "Chat"
+                ],
+                "summary": "GetChat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room Id",
+                        "name": "roomId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Chat"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Send message to a chat.",
+                "tags": [
+                    "Room",
+                    "Chat"
+                ],
+                "summary": "SendChatMessage",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room Id",
+                        "name": "roomId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Send chat message request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SendChatMessage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/SendChatMessageResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/user/create": {
             "post": {
                 "security": [
@@ -138,6 +221,51 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "Chat": {
+            "type": "object",
+            "required": [
+                "history",
+                "id",
+                "roomId"
+            ],
+            "properties": {
+                "history": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ChatMessage"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "roomId": {
+                    "type": "string"
+                }
+            }
+        },
+        "ChatMessage": {
+            "type": "object",
+            "required": [
+                "isCurrentUser",
+                "sentAt",
+                "text",
+                "user"
+            ],
+            "properties": {
+                "isCurrentUser": {
+                    "type": "boolean"
+                },
+                "sentAt": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/User"
+                }
+            }
+        },
         "Error": {
             "type": "object",
             "required": [
@@ -195,6 +323,31 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/User"
                     }
+                }
+            }
+        },
+        "SendChatMessage": {
+            "type": "object",
+            "required": [
+                "text"
+            ],
+            "properties": {
+                "text": {
+                    "type": "string",
+                    "maxLength": 1500,
+                    "minLength": 1,
+                    "example": "hello world"
+                }
+            }
+        },
+        "SendChatMessageResponse": {
+            "type": "object",
+            "required": [
+                "isOk"
+            ],
+            "properties": {
+                "isOk": {
+                    "type": "boolean"
                 }
             }
         },

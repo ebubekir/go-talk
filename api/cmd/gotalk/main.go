@@ -4,6 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ebubekir/go-talk/api/cmd/gotalk/docs"
+	chatApp "github.com/ebubekir/go-talk/api/internal/chat/application"
+	chatInfra "github.com/ebubekir/go-talk/api/internal/chat/infra"
+	chatHttp "github.com/ebubekir/go-talk/api/internal/chat/interfaces/http"
 	"github.com/ebubekir/go-talk/api/internal/middleware"
 	"github.com/ebubekir/go-talk/api/internal/response"
 	roomApp "github.com/ebubekir/go-talk/api/internal/room/application"
@@ -52,6 +55,10 @@ func main() {
 	roomService := roomApp.NewRoomService(roomRepo, userService)
 	roomEventListener := roomApp.NewRoomEventListener(roomService, roomHub)
 
+	// Room Chat
+	chatRepo := chatInfra.NewMongoDBChatRepository(mongoDb)
+	chatService := chatApp.NewChatService(chatRepo)
+
 	// Register event listeners
 	dispatcher.Register(roomEventListener)
 
@@ -93,6 +100,7 @@ func main() {
 		v1Routes.Use(authMiddleware.Handler())
 		userHttp.RegisterUserRoutes(v1Routes, userService)
 		roomHttp.RegisterRoomRoutes(v1Routes, roomService, userService)
+		chatHttp.RegisterChatRoutes(v1Routes, chatService, userService, roomService)
 	}
 
 	if err := api.Run(":8080"); err != nil {

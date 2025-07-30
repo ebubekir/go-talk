@@ -1,4 +1,35 @@
 definitions:
+  Chat:
+    properties:
+      history:
+        items:
+          $ref: '#/definitions/ChatMessage'
+        type: array
+      id:
+        type: string
+      roomId:
+        type: string
+    required:
+    - history
+    - id
+    - roomId
+    type: object
+  ChatMessage:
+    properties:
+      isCurrentUser:
+        type: boolean
+      sentAt:
+        type: string
+      text:
+        type: string
+      user:
+        $ref: '#/definitions/User'
+    required:
+    - isCurrentUser
+    - sentAt
+    - text
+    - user
+    type: object
   Error:
     properties:
       code:
@@ -40,6 +71,23 @@ definitions:
     - owner
     - participants
     type: object
+  SendChatMessage:
+    properties:
+      text:
+        example: hello world
+        maxLength: 1500
+        minLength: 1
+        type: string
+    required:
+    - text
+    type: object
+  SendChatMessageResponse:
+    properties:
+      isOk:
+        type: boolean
+    required:
+    - isOk
+    type: object
   User:
     properties:
       email:
@@ -79,6 +127,59 @@ paths:
       summary: GetRoomDetail
       tags:
       - Room
+  /room/{roomId}/chat:
+    get:
+      description: Get chat of room
+      parameters:
+      - description: Room Id
+        in: path
+        name: roomId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Chat'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+      - ApiKeyAuth: []
+      summary: GetChat
+      tags:
+      - Room
+      - Chat
+    post:
+      description: Send message to a chat.
+      parameters:
+      - description: Room Id
+        in: path
+        name: roomId
+        required: true
+        type: string
+      - description: Send chat message request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/SendChatMessage'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/SendChatMessageResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+      - ApiKeyAuth: []
+      summary: SendChatMessage
+      tags:
+      - Room
+      - Chat
   /room/create:
     post:
       description: Create room
