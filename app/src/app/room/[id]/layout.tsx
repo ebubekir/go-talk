@@ -1,22 +1,24 @@
 'use client'
 
-import {RoomContextProvider, useRoom} from "@/context/room-context";
-import {use} from "react";
-import {RoomSocketProvider} from "@/context/room-socket-context";
+import { RoomContextProvider } from '@/context/room-context'
+import { use } from 'react'
+import { RoomSocketProvider } from '@/context/room-socket-context'
+import { MediaProvider } from '@/context/media-context'
+import { RpcProvider } from '@/context/rpc-context'
 
 export default function RoomLayout({
-    children,
-    params,
+  children,
+  params,
 }: Readonly<{
-    children: React.ReactNode;
-    params: Promise<{ id: string}>
+  children: React.ReactNode
+  params: Promise<{ id: string }>
 }>) {
-    const { id } = use(params)
-    return (
-        <RoomContextProvider>
-            <RoomSocketProvider>
-                {children}
-            </RoomSocketProvider>
-        </RoomContextProvider>
-    );
+  const { id } = use(params)
+  return (
+    <RoomContextProvider>
+      <RoomSocketProvider>
+        <RpcProvider>{children}</RpcProvider>
+      </RoomSocketProvider>
+    </RoomContextProvider>
+  )
 }
