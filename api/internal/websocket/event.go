@@ -13,6 +13,11 @@ const (
 	EventParticipantLeft   EventType = "participant-left"
 	EventMessageSent       EventType = "message-sent"
 	EventRoomClosed        EventType = "room-closed"
+	EventTypeOffer         EventType = "offer"
+	EventTypeAnswer        EventType = "answer"
+	EventTypeIceCandidate  EventType = "ice-candidate"
+	EventTypeCandidate     EventType = "candidate"
+	EventTypeIce           EventType = "ice"
 )
 
 type ParticipantJoinedPayload struct {
@@ -27,7 +32,15 @@ type ParticipantLeftPayload struct {
 	LeftAt    time.Time `json:"leftAt"`
 }
 
+type SendMessagePayload struct {
+	UserEmail string    `json:"userEmail"`
+	UserName  string    `json:"userName"`
+	Text      string    `json:"text"`
+	SentAt    time.Time `json:"sentAt"`
+}
 type Event struct {
+	From      string      `json:"from"`
+	To        string      `json:"to"`
 	Type      EventType   `json:"type"`
 	RoomId    string      `json:"roomId"`
 	Payload   interface{} `json:"payload"`

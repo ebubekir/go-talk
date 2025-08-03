@@ -47,9 +47,6 @@ func (r *Room) RemoveParticipant(userId UserId) error {
 }
 
 func (r *Room) HasParticipant(userId UserId) bool {
-	if r.OwnerId == userId {
-		return true
-	}
 
 	if len(r.Participants) == 0 {
 		return false

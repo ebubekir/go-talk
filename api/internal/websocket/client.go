@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"encoding/json"
 	"github.com/gorilla/websocket"
 	"log"
 	"time"
@@ -10,7 +11,7 @@ const (
 	writeWait      = 10 * time.Second
 	pongWait       = 60 * time.Second
 	pingPeriod     = (pongWait * 9) / 10
-	maxMessageSize = 512
+	maxMessageSize = 65536
 )
 
 type Client struct {
@@ -35,10 +36,27 @@ func (c *Client) readPump(hub *Hub) {
 	})
 
 	for {
-		_, _, err := c.conn.ReadMessage()
+		_, msg, err := c.conn.ReadMessage()
 		if err != nil {
 			log.Println("read error:", err)
 			break
+		}
+		var payload map[string]interface{}
+		print("payload", payload)
+		if err := json.Unmarshal(msg, &payload); err == nil {
+			if msgType, ok := payload["type"].(string); ok {
+				switch msgType {
+				case "offer", "answer", "candidate", "ice":
+					hub.broadcast <- Event{
+						From:    c.userEmail,
+						RoomId:  c.roomId,
+						Payload: payload,
+						Type:    EventType(msgType),
+					}
+				default:
+					print("unknown message type")
+				}
+			}
 		}
 	}
 }

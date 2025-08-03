@@ -60,6 +60,5 @@ func (ch *ChatHandler) SendChatMessage() gin.HandlerFunc {
 		}
 
 		response.Success(c, &SendChatMessageResponse{IsOk: true})
-
 	}
 }

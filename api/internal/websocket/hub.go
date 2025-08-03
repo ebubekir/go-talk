@@ -1,7 +1,6 @@
 package websocket
 
 import (
-	"fmt"
 	"github.com/ebubekir/go-talk/api/pkg/firebase"
 	"time"
 )
@@ -37,6 +36,7 @@ func (h *Hub) Run() {
 			go h.dispatcher.Dispatch(&Event{
 				RoomId: client.roomId,
 				Type:   EventParticipantJoined,
+				From:   client.userEmail,
 				Payload: &ParticipantJoinedPayload{
 					UserName:  client.userName,
 					UserEmail: client.userEmail,
@@ -52,6 +52,7 @@ func (h *Hub) Run() {
 					go h.dispatcher.Dispatch(&Event{
 						RoomId: client.roomId,
 						Type:   EventParticipantLeft,
+						From:   client.userEmail,
 						Payload: &ParticipantLeftPayload{
 							UserName:  client.userName,
 							UserEmail: client.userEmail,
@@ -64,19 +65,19 @@ func (h *Hub) Run() {
 			}
 
 		case message := <-h.broadcast:
-			fmt.Printf("Broadcasting event: %s\n", message.Type)
 			if roomClients, ok := h.clients[message.RoomId]; ok {
 				for client := range roomClients {
 					select {
 					case client.send <- message.ToJSON():
 					default:
-						print("Close client'da misin la")
 						close(client.send)
 						delete(roomClients, client)
 					}
 				}
 			}
+
 		}
+
 	}
 }
 

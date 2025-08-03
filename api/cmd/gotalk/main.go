@@ -57,7 +57,7 @@ func main() {
 
 	// Room Chat
 	chatRepo := chatInfra.NewMongoDBChatRepository(mongoDb)
-	chatService := chatApp.NewChatService(chatRepo)
+	chatService := chatApp.NewChatService(chatRepo, roomHub, userService)
 
 	// Register event listeners
 	dispatcher.Register(roomEventListener)
